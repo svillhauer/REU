@@ -1,0 +1,24 @@
+# ===================
+# | RBCS parameters |
+# ===================
+
+# Relaxtion parameters
+ &RBCS_PARM01
+ useRBCtemp=.TRUE.,
+ useRBCsalt=.TRUE.,
+ useRBCuVel=.FALSE.,
+ useRBCvVel=.FALSE.,
+ tauRelaxT=4.32000000e+03,
+ tauRelaxS=4.32000000e+03,
+ tauRelaxU=4.32000000e+03,
+ tauRelaxV=4.32000000e+03,
+ relaxTFile='sponge_temp.bin',
+ relaxSFile='sponge_salt.bin',
+ relaxMaskFile(1)='rbcs_temp_mask.bin',
+ relaxMaskFile(2)='rbcs_salt_mask.bin',
+ &
+
+# ptracer parameters
+ &RBCS_PARM02
+ &
+

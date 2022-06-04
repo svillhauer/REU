@@ -1,0 +1,13 @@
+# =======================
+# | Package parameters |
+# =======================
+
+# Active packages
+ &PACKAGES
+ useDiagnostics=.TRUE.,
+ useKPP=.TRUE.,
+ useRBCS=.TRUE.,
+ useSEAICE=.FALSE.,
+ useEXF=.FALSE.,
+ &
+

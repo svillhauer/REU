@@ -1,0 +1,111 @@
+# ====================
+# | Model parameters |
+# ====================
+
+# Continuous equation parameters
+ &PARM01
+ vectorInvariantMomentum=.TRUE.,
+ viscAr=1.00000000e-04,
+ viscA4=0.00000000e+00,
+ viscAh=0.00000000e+00,
+ viscA4Grid=0.00000000e+00,
+ viscAhGrid=0.00000000e+00,
+ viscA4GridMax=5.00000000e-01,
+ viscAhGridMax=1.00000000e+00,
+ useAreaViscLength=.FALSE.,
+ useFullLeith=.TRUE.,
+ viscC4leith=0.00000000e+00,
+ viscC4leithD=0.00000000e+00,
+ viscC2leith=0.00000000e+00,
+ viscC2leithD=0.00000000e+00,
+ viscC2smag=0.00000000e+00,
+ viscC4smag=4.00000000e+00,
+ diffKrT=0.00000000e+00,
+ diffKhT=0.00000000e+00,
+ tempAdvScheme=33,
+ saltAdvScheme=33,
+ multiDimAdvection=.TRUE.,
+ tempStepping=.TRUE.,
+ saltStepping=.TRUE.,
+ staggerTimeStep=.TRUE.,
+ eosType='JMD95Z',
+ no_slip_sides=.FALSE.,
+ no_slip_bottom=.FALSE.,
+ bottomDragLinear=0.00000000e+00,
+ bottomDragQuadratic=0.00000000e+00,
+ f0=0.00000000e+00,
+ gravity=9.81000000e+00,
+ rhonil=1.00000000e+03,
+ rhoConst=1.00000000e+03,
+ ivdc_kappa=0.00000000e+00,
+ implicitDiffusion=.TRUE.,
+ implicitViscosity=.TRUE.,
+ nonHydrostatic=.FALSE.,
+ exactConserv=.TRUE.,
+ useCDscheme=.FALSE.,
+ readBinaryPrec=64,
+ useSingleCpuIO=.TRUE.,
+ debugLevel=-1,
+ vectorInvariantMomentum=.TRUE.,
+ useJamartWetPoints=.TRUE.,
+ useJamartMomAdv=.TRUE.,
+ diffK4T=3.90625000e+02,
+ diffK4S=3.90625000e+02,
+ &
+
+# Elliptic solver parameters
+ &PARM02
+ useSRCGSolver=.TRUE.,
+ cg2dMaxIters=1000,
+ cg2dTargetResidual=1.00000000e-12,
+ cg3dMaxIters=300,
+ cg3dTargetResidual=1.00000000e-07,
+ &
+
+# Time stepping parameters
+ &PARM03
+ momDissip_In_AB=.FALSE.,
+ tracForcingOutAB=1,
+ nIter0=0,
+ abEps=1.00000000e-01,
+ chkptFreq=4.32000000e+03,
+ pChkptFreq=4.32000000e+03,
+ taveFreq=0.00000000e+00,
+ dumpFreq=0.00000000e+00,
+ monitorFreq=8.64000000e+04,
+ cAdjFreq=0.00000000e+00,
+ dumpInitAndLast=.TRUE.,
+ pickupStrictlyMatch=.FALSE.,
+ endTime=86400,
+ deltaT=5.00000000e+01,
+ &
+
+# Gridding parameters
+ &PARM04
+ usingCartesianGrid=.TRUE.,
+ usingSphericalPolarGrid=.FALSE.,
+ delX=5.00000000e+01,
+ delY=5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 
+      5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01, 5.00000000e+01,
+ delR=2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 
+      2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 
+      2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 
+      2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 
+      2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00, 2.00000000e+00,
+ &
+
+# Input datasets
+ &PARM05
+ bathyFile='bathyFile.bin',
+ hydrogThetaFile='hydrogThetaFile.bin',
+ hydrogSaltFile='hydrogSaltFile.bin',
+ &
+
