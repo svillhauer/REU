@@ -58,7 +58,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   
   nonHydrostatic = false; %%% Whether to run in nonhydrostatic mode
   use_seaIce = false; %%% Whether to run with sea ice (not yet implemented)
-  use_3D = false; %%% Whether to run a 3D vs 2D simulation
+  use_3D = true; %%% Whether to run a 3D vs 2D simulation
   Ypoly = 0; %%% Latitudinal location of polynya
   Wpoly = 5*m1km; %%% Latitudinal width of polynya
   
@@ -66,7 +66,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   %%%%% FIXED PARAMETER VALUES %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
   
-  simTime = 1*t1day; %%% Simulation time  
+  simTime = 10*t1day; %%% Simulation time  
   nIter0 = 0; %%% Initial iteration 
   Lx = 1*m1km; %%% Domain size in x 
   Ly = 5*m1km; %%% Domain size in y   
@@ -85,9 +85,9 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
 %   viscC4smag = 0; %%% Smagorinsky biharmonic viscosity
 %   diffK4Tgrid = 0.2; %%% Grid-dependent biharmonic diffusivity
   viscA4Grid = 0; %%% Grid-dependent biharmonic viscosity    
-  viscC4smag = 4; %%% Smagorinsky biharmonic viscosity
-  diffK4Tgrid = 0.1; %%% Grid-dependent biharmonic diffusivity
-  viscAr = 1e-4; %%% Vertical viscosity
+  viscC4smag = 2; %%% Smagorinsky biharmonic viscosity
+  diffK4Tgrid = 0.0; %%% Grid-dependent biharmonic diffusivity
+  viscAr = 1e-5; %%% Vertical viscosity
   diffKhT = 0; %%% Horizontal temp diffusion
   diffKrT = 0; %%% Vertical temp diffusion     
   
@@ -298,16 +298,44 @@ periodicExternalForcing = true;
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        
   %%% Quasi-tanh-shaped T/S profiles
-  Zpyc = -30;
-  Wpyc = 10;
-  Smin = 34.3;
-  Smax = 34.7;
-  Tmin = 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
-  Tmax= 3;  
+ %%%%South BC
+ shelfthickness=0; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
+  Zpyc = -15-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
+  Wpyc = 10; %pycnocline width scale
+  Smin = 34.2;
+  Smax = 34.7; %34.7
+  Tmin = -0.6 ;% 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
+  Tmax= -0.1;  
   gam_h = 0.01;
   tRef = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
   sRef = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
   
+  %deep interpolation (because you want nonzero stratifiction at depth)
+ sRef(round(Nr/4)+shelfthickness:end)=linspace(sRef(round(Nr/4)+shelfthickness),sRef(end),Nr-round(Nr/4)-shelfthickness+1);
+ sRef=smoothdata(sRef); % because the transition to interpolation produced sharp vertical gradients
+
+ tRef(round(Nr/4):end)=linspace(tRef(round(Nr/4)),tRef(end),Nr-round(Nr/4)+1);
+ tRef=smoothdata(tRef);
+
+
+%%%%North BC
+   Zpyc = -15; %%northern/outflow boundary pycnocline mid-depth
+  Wpyc = 10;
+  Smin = 33.95;
+  Smax = 34.7; %
+  Tmin = -0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
+  Tmax= -0.15;  
+  gam_h = 0.01;
+  tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
+  sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
+
+
+ sRefout(round(Nr/4):end)=linspace(sRefout(round(Nr/4)),sRefout(end),Nr-round(Nr/4)+1);
+ sRefout=smoothdata(sRefout);
+
+ tRefout(round(Nr/4):end)=linspace(tRefout(round(Nr/4)),tRefout(end),Nr-round(Nr/4)+1);
+ tRefout=smoothdata(tRefout);
+
   %%% Quasi-linear near-surface stratification
 %   Zpyc = 0;
 %   Hpyc = 300;  
@@ -324,7 +352,8 @@ periodicExternalForcing = true;
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(tRef,zz);
+    plot(tRef,zz); hold on
+    plot(tRefout,zz);
     xlabel('\theta_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference temperature');
@@ -335,7 +364,8 @@ periodicExternalForcing = true;
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(sRef,zz);
+    plot(sRef,zz); hold on
+     plot(sRefout,zz);
     xlabel('S_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference salinity');
@@ -411,8 +441,8 @@ periodicExternalForcing = true;
 
   %%% Upper bound for absolute horizontal fluid velocity (m/s)
   %%% At the moment this is just an estimate
-  Umax = 0.5;  
-  Wmax = 0.1; %%% NEEDS TO BE INCREASED FOR DEEP PYCNOCLINES
+  Umax = 0.225;  
+  Wmax = 0.045; %%% NEEDS TO BE INCREASED FOR DEEP PYCNOCLINES
   %%% Max gravity wave speed 
   cmax = 0;%max(Cig);
   %%% Max gravity wave speed using total ocean depth
@@ -447,6 +477,8 @@ periodicExternalForcing = true;
     deltaT = min([deltaT deltaT_vadv]);
   end
   deltaT = round(deltaT);
+  deltaT=deltaT/7; %ad hoc: we found that the normal dT wasn't working (approx. dT=14s)
+
   nTimeSteps = ceil(simTime/deltaT);
   simTimeAct = nTimeSteps*deltaT;
   
@@ -468,37 +500,6 @@ periodicExternalForcing = true;
   
   
   
-  %%%%%%%%%%%%%%%%%%%%%%%%
-  %%%%% INITIAL DATA %%%%%
-  %%%%%%%%%%%%%%%%%%%%%%%%
-  
-  
-  %%% Random noise amplitude
-  tNoise = 0.01;  
-  sNoise = 0.001;
-      
-  %%% Align initial temp with background
-  hydroTh = ones(Nx,Ny,Nr);
-  hydroSa = ones(Nx,Ny,Nr);
-  for k=1:1:Nr
-    hydroTh(:,:,k) = squeeze(hydroTh(:,:,k))*tRef(k);
-    hydroSa(:,:,k) = squeeze(hydroSa(:,:,k))*sRef(k);
-  end
-  
-  %%% Add some random noise
-  hydroTh = hydroTh + tNoise*(2*rand(Nx,Ny,Nr)-1);
-  hydroSa = hydroSa + sNoise*(2*rand(Nx,Ny,Nr)-1);
-  
-  %%% Write to data files
-  writeDataset(hydroTh,fullfile(inputpath,'hydrogThetaFile.bin'),ieee,prec); 
-  parm05.addParm('hydrogThetaFile','hydrogThetaFile.bin',PARM_STR);
-  writeDataset(hydroSa,fullfile(inputpath,'hydrogSaltFile.bin'),ieee,prec); 
-  parm05.addParm('hydrogSaltFile','hydrogSaltFile.bin',PARM_STR);
-  
-  
-  
-  
-  
   
   
   
@@ -509,10 +510,10 @@ periodicExternalForcing = true;
   %%%%% TRACER DIFFUSION %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-  diffK4T = diffK4Tgrid * max([dx dy])^4 / (32*deltaT);
-  diffK4S = diffK4T;
-  parm01.addParm('diffK4T',diffK4T,PARM_REAL); 
-  parm01.addParm('diffK4S',diffK4S,PARM_REAL); 
+  %diffK4T = diffK4Tgrid * max([dx dy])^4 / (32*deltaT);
+  %diffK4S = diffK4T;
+  %parm01.addParm('diffK4T',diffK4T,PARM_REAL); 
+  %parm01.addParm('diffK4S',diffK4S,PARM_REAL); 
  
   
   
@@ -594,16 +595,6 @@ periodicExternalForcing = true;
 
   %}
   
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %%%%% WRITE THE 'data' FILE %%%%%
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-  
-  %%% Creates the 'data' file
-  write_data(inputpath,PARM,listterm,realfmt);
-  
- 
-  
   
   
   
@@ -651,8 +642,8 @@ periodicExternalForcing = true;
   useRBCsalt = true;
   useRBCuVel = false;
   useRBCvVel = false;
-  tauRelaxT = 0.05*t1day;
-  tauRelaxS = 0.05*t1day;
+  tauRelaxT = 0.1*t1day;
+  tauRelaxS = 0.1*t1day;
   tauRelaxU = 0.05*t1day;
   tauRelaxV = 0.05*t1day;
   rbcs_parm01.addParm('useRBCtemp',useRBCtemp,PARM_BOOL);
@@ -668,15 +659,8 @@ periodicExternalForcing = true;
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %%%%% RELAXATION TEMPERATURE %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Zpyc = -40;
-  Wpyc = 10;
-  Smin = 34.3;
-  Smax = 34.7;
-  Tmin = 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
-  Tmax= 3;  
-  gam_h = 0.01;
-  tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
-  sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
+
+  %tRefout (outflowing/north BC T/S) defined above
 
   for i=1:size(tRef,2)
 Tmat(i,:)=linspace(tRef(1,i), tRefout(1,i),Ny);
@@ -687,6 +671,51 @@ Smat(i,:)=linspace(sRef(1,i), sRefout(1,i),Ny);
 Tmatfinal=permute(Tmatfull,[3,2,1]);
 Smatfull=repmat(Smat,[1 1 Nx]);
 Smatfinal=permute(Smatfull,[3,2,1]);
+
+
+
+
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% INITIAL DATA %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%
+  
+  
+  %%% Random noise amplitude
+  tNoise = 0;%0.01;  
+  sNoise = 0;%0.001;
+      
+  %%% Align initial temp with background
+  %changed initial data to be the relaxed 3D fields (from RBCS)
+  hydroTh = Tmatfinal;%ones(Nx,Ny,Nr);
+  hydroSa = Smatfinal;%ones(Nx,Ny,Nr);
+  %for k=1:1:Nr
+  %  hydroTh(:,:,k) = squeeze(hydroTh(:,:,k))*tRef(k);
+  %  hydroSa(:,:,k) = squeeze(hydroSa(:,:,k))*sRef(k);
+  %end
+  
+  %%% Add some random noise
+  hydroTh = hydroTh + tNoise*(2*rand(Nx,Ny,Nr)-1);
+  hydroSa = hydroSa + sNoise*(2*rand(Nx,Ny,Nr)-1);
+  
+  %%% Write to data files
+  writeDataset(hydroTh,fullfile(inputpath,'hydrogThetaFile.bin'),ieee,prec); 
+  parm05.addParm('hydrogThetaFile','hydrogThetaFile.bin',PARM_STR);
+  writeDataset(hydroSa,fullfile(inputpath,'hydrogSaltFile.bin'),ieee,prec); 
+  parm05.addParm('hydrogSaltFile','hydrogSaltFile.bin',PARM_STR);
+  
+  
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% WRITE THE 'data' FILE %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+  
+  %%% Creates the 'data' file
+  write_data(inputpath,PARM,listterm,realfmt);
+  
+
+
   
   %%% Set relaxation temp equal to surface freezing temperature
   % temp_relax = Tmin*ones(Nx,Ny,Nr);  
@@ -710,7 +739,7 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   for j=1:Ny      
     for i=1:Nx             
       if (yy(j)<-0.4*Ly) || (yy(j)>0.4*Ly) 
-        msk(:,j,1) = 1;
+        msk(:,j,:) = 1;
       end
     end
   end         
@@ -733,6 +762,11 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   
   
   
+
+ 
+  
+  
+
   
   
 % %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1160,16 +1194,59 @@ Smatfinal=permute(Smatfull,[3,2,1]);
 
 
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%% SHELF ICE  %%%%%%%%%%
+  %%%%     PARAMETERS       %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+phi0surf=zeros(Nx,Ny);
+fid=fopen(fullfile(inputpath,'SHELFICEloadAnomalyFile.bin'), 'w','b'); 
+fwrite(fid,phi0surf,prec);fclose(fid);
+
+shelfthickness=10;
+
+depth=-shelfthickness; %default -15 deep channel
+icetopo=depth*ones(Nx,Ny);
+halfwidth=50; %25 for default half channel width
+icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )=0;
+
+
+fid=fopen(fullfile(inputpath,'SHELFICEtopoFile.bin'), 'w','b'); 
+fwrite(fid,icetopo,prec);fclose(fid);
+
+% to store parameter names and values
+shelfice_parm01 = parmlist;
+SHELFICE_PARM = {shelfice_parm01};
+
+SHELFICEloadAnomalyFile = 'SHELFICEloadAnomalyFile.bin';
+SHELFICEtopoFile = 'SHELFICEtopoFile.bin';
+SHELFICEuseGammaFrict = true;
+SHELFICEboundaryLayer = true;
+SHELFICEconserve = true;
+%   SHELFICEheatTransCoeff = .0005;
+%   SHELFICEheatTransCoeff = .0001;
+SHELFICEheatTransCoeff = 0;
+SHELFICEwriteState = true;
+
+
+shelfice_parm01.addParm('SHELFICEloadAnomalyFile',SHELFICEloadAnomalyFile,PARM_STR);
+shelfice_parm01.addParm('SHELFICEtopoFile',SHELFICEtopoFile,PARM_STR);
+shelfice_parm01.addParm('SHELFICEuseGammaFrict',SHELFICEuseGammaFrict,PARM_BOOL);
+shelfice_parm01.addParm('SHELFICEboundaryLayer',SHELFICEboundaryLayer,PARM_BOOL);
+shelfice_parm01.addParm('SHELFICEconserve',SHELFICEconserve,PARM_BOOL);
+shelfice_parm01.addParm('SHELFICEheatTransCoeff',SHELFICEheatTransCoeff,PARM_REAL);
+shelfice_parm01.addParm('SHELFICEwritestate',SHELFICEwriteState,PARM_BOOL);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% WRITE THE 'data.shelfice' FILE %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
 
   
-  
-  
-  
-  
-  
- 
- 
-  
+
+
+
   %%%%%%%%%%%%%%%%%%%%%%%
   %%%%%%%%%%%%%%%%%%%%%%%
   %%%%% DIAGNOSTICS %%%%%
@@ -1256,9 +1333,9 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   
   numdiags_inst = length(diag_fields_inst);  
   if (use_3D)
-    diag_freq_inst = 0.05*t1day;
+    diag_freq_inst = 0.0005*t1day;
   else
-    diag_freq_inst = 0.05*t1day;
+    diag_freq_inst = 0.0005*t1day;
   end
   diag_phase_inst = 0;
   
@@ -1307,8 +1384,9 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   packages = parmlist;
   PACKAGE_PARM = {packages};  
   
-  packages.addParm('useDiagnostics',true,PARM_BOOL);    
-  packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
+  packages.addParm('useDiagnostics',true,PARM_BOOL);
+  packages.addParm('useSHELFICE',true,PARM_BOOL);
+  %packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
   packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
   packages.addParm('useSEAICE',use_seaIce,PARM_BOOL);  
   packages.addParm('useEXF',use_seaIce,PARM_BOOL);  

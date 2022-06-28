@@ -63,11 +63,11 @@ function newexp (batch_name,exp_name)
   use_mpi = false; %%% set true for parallel processing
   use_pbs = false; %%% set true for execution via PBS
   cluster = 'none';
-  sNx = 70; %%% no. of x-gridpoints per tile
-  sNy = 100; %%% no. of y-gridpoints per tile
+  sNx = 80; %%% no. of x-gridpoints per tile
+  sNy = 200; %%% no. of y-gridpoints per tile
   nPx = 1; %%% no. of processors in x-direction
   nPy = 1; %%% no. of processors in y-direction
-  Nr = 50; %%% no. of z-gridpoints  
+  Nr = 60; %%% no. of z-gridpoints  
  
   %%% Set-up for Ardbeg, 400 x 400 x 100
 %   opt_file = 'ardbeg_ucla'; %%% options file name

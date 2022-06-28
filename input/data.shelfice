@@ -1,0 +1,14 @@
+# =============++======
+# | SHELFICE parameters |
+# =============++======
+
+ &SHELFICE_PARM01
+ SHELFICEloadAnomalyFile='SHELFICEloadAnomalyFile.bin',
+ SHELFICEtopoFile='SHELFICEtopoFile.bin',
+ SHELFICEuseGammaFrict=.TRUE.,
+ SHELFICEboundaryLayer=.TRUE.,
+ SHELFICEconserve=.TRUE.,
+ SHELFICEheatTransCoeff=0.00000000e+00,
+ SHELFICEwritestate=.TRUE.,
+ &
+

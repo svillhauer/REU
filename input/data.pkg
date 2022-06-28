@@ -5,7 +5,7 @@
 # Active packages
  &PACKAGES
  useDiagnostics=.TRUE.,
- useKPP=.TRUE.,
+ useSHELFICE=.TRUE.,
  useRBCS=.TRUE.,
  useSEAICE=.FALSE.,
  useEXF=.FALSE.,
