@@ -311,7 +311,7 @@ periodicExternalForcing = true;
   sRef = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
   
   %deep interpolation (because you want nonzero stratifiction at depth)
- sRef(round(Nr/4)+shelfthickness:end)=linspace(sRef(round(Nr/4)+shelfthickness),sRef(end),Nr-round(Nr/4)-shelfthickness+1);
+ sRef(round((Nr/4)+(Nr/H)*shelfthickness):end)=linspace(sRef(round((Nr/4)+(Nr/H)*shelfthickness)),sRef(end),Nr-round((Nr/4)+(Nr/H)*shelfthickness)+1);
  sRef=smoothdata(sRef); % because the transition to interpolation produced sharp vertical gradients
 
  tRef(round(Nr/4):end)=linspace(tRef(round(Nr/4)),tRef(end),Nr-round(Nr/4)+1);
@@ -1280,10 +1280,18 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   ndiags = 0;
   
   diag_fields_avg = ...
-  {...
+  {... 
 
-%     'UV_VEL_Z','WU_VEL','WV_VEL'... %%% Momentum fluxes
-%     'UVELSLT','VVELSLT','WVELSLT', ... %%% Salt fluxes
+  'ETAN', ...  %%% SSH
+    'UVEL','VVEL','WVEL'...%%%velocities
+    'THETA', ... %%% Temperature
+    'SALT', ...
+     'UVELSLT','VVELSLT','WVELSLT', ... %%% Salt fluxes
+     'UVELTH','VVELTH','WVELTH', ... %%% Temperature fluxes
+     'UV_VEL_Z','WU_VEL','WV_VEL'... %%% Momentum fluxes
+%  'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
+%   'SHIfwFlx'...%%'SHIhtFlx','SHIForcT','SHIForcS', ...  %%%%% Ice shelf melt
+
 
 %     'PHIHYD', ... %%% Pressure
 %     'LaUH1TH','LaVH1TH','LaHw1TH','LaHs1TH' ... %%% LAYERS fluxes
@@ -1298,12 +1306,12 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
 %      'UVEL','VVEL','WVEL'... %%% Velocities
 %      'THETA', ... %%% Temperature
 %      'SALT', ... %%% Salinity
-%      'SHIfwFlx'...%%'SHIhtFlx','SHIForcT','SHIForcS', ...
-%      'UVELTH','VVELTH','WVELTH', ... %%% Temperature fluxes
+%      'SHIfwFlx'...%%'SHIhtFlx','SHIForcT','SHIForcS', ...  %%%%% Ice shelf melt
+%    
   };
   
   numdiags_avg = length(diag_fields_avg);  
-  diag_freq_avg = 5*t1day;
+  diag_freq_avg = 0.5*t1day;
   diag_phase_avg = 0;    
      
   diag_parm01.addParm('diag_mnc',true,PARM_BOOL);  
@@ -1333,9 +1341,9 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   
   numdiags_inst = length(diag_fields_inst);  
   if (use_3D)
-    diag_freq_inst = 0.0005*t1day;
+    diag_freq_inst = 0.1*t1day;
   else
-    diag_freq_inst = 0.0005*t1day;
+    diag_freq_inst = 0.1*t1day;
   end
   diag_phase_inst = 0;
   

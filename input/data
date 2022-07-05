@@ -64,10 +64,10 @@
  &PARM03
  momDissip_In_AB=.FALSE.,
  tracForcingOutAB=1,
- nIter0=0,
+ nIter0=194400,
  abEps=1.00000000e-01,
- chkptFreq=4.32000000e+03,
- pChkptFreq=4.32000000e+03,
+ chkptFreq=8.64000000e+04,
+ pChkptFreq=8.64000000e+04,
  taveFreq=0.00000000e+00,
  dumpFreq=0.00000000e+00,
  monitorFreq=8.64000000e+04,
