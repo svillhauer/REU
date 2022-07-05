@@ -7,10 +7,10 @@
 function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)  
 
   %%% Load EOS utilities
-  addpath /Users/sarahvillhauer/Desktop/MITgcm-master/MITgcm_SC/GSW;
-  addpath /Users/sarahvillhauer/Desktop/MITgcm-master/MITgcm_SC/GSW/html;
-  addpath /Users/sarahvillhauer/Desktop/MITgcm-master/MITgcm_SC/GSW/library;
-  addpath /Users/sarahvillhauer/Desktop/MITgcm-master/MITgcm_SC/GSW/pdf;
+ addpath /Volumes/Elements/matlab/gsw_matlab_v3_06_12/;
+  addpath /Volumes/Elements/matlab/gsw_matlab_v3_06_12/html;
+  addpath /Volumes/Elements/matlab/gsw_matlab_v3_06_12/library;
+  addpath /Volumes/Elements/matlab/gsw_matlab_v3_06_12/pdf;
     
   %%% TODO ADD SEA ICE AND ATMOSPHERIC FORCING; REMOVE SW, LW, SENS HEAT FLUXES      
   %%% TODO add sponges for waves?
@@ -56,11 +56,11 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   %%%%% SIMULATION CONTROL PARAMETERS %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-  nonHydrostatic = false; %%% Whether to run in nonhydrostatic mode
+  nonHydrostatic = true; %%% Whether to run in nonhydrostatic mode
   use_seaIce = false; %%% Whether to run with sea ice (not yet implemented)
   use_3D = true; %%% Whether to run a 3D vs 2D simulation
-  Ypoly = 0; %%% Latitudinal location of polynya
-  Wpoly = 5*m1km; %%% Latitudinal width of polynya
+  Ypoly = 0; %%% Latitudinal location 
+  Wpoly = 5*m1km; %%% Latitudinal width
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %%%%% FIXED PARAMETER VALUES %%%%%
@@ -69,8 +69,8 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   simTime = 10*t1day; %%% Simulation time  
   nIter0 = 0; %%% Initial iteration 
   Lx = 1*m1km; %%% Domain size in x 
-  Ly = 5*m1km; %%% Domain size in y   
-  H = 100; %%% Domain size in z 
+  Ly = 1*m1km; %%% Domain size in y   
+  H = 41.5; %%% Domain size in z 
   g = 9.81; %%% Gravity
   Omega = 2*pi*366/365/86400;  
   lat0 = -70; %%% Latitude at southern boundary
@@ -85,12 +85,15 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
 %   viscC4smag = 0; %%% Smagorinsky biharmonic viscosity
 %   diffK4Tgrid = 0.2; %%% Grid-dependent biharmonic diffusivity
   viscA4Grid = 0; %%% Grid-dependent biharmonic viscosity    
-  viscC4smag = 2; %%% Smagorinsky biharmonic viscosity
+  viscC4smag = 0; %%% Smagorinsky biharmonic viscosity
   diffK4Tgrid = 0.0; %%% Grid-dependent biharmonic diffusivity
-  viscAr = 1e-5; %%% Vertical viscosity
+  viscAr = 0; %%% Vertical viscosity
   diffKhT = 0; %%% Horizontal temp diffusion
-  diffKrT = 0; %%% Vertical temp diffusion     
-  
+  diffKrT = 1.3e-7; %%% Vertical temp diffusion     
+  diffKhS = 0; %%% Horizontal salt diffusion
+  diffKrS = 7.2e-10; %%% Vertical salt diffusion     
+ smag3D_coeff=2.00e-02; %3D smag coefficient
+
   %%% Parameters related to periodic forcing
   %{ 
 periodicExternalForcing = true;
@@ -119,16 +122,20 @@ periodicExternalForcing = true;
   parm01.addParm('viscAhGridMax',1,PARM_REAL);
   parm01.addParm('useAreaViscLength',false,PARM_BOOL);
   parm01.addParm('useFullLeith',true,PARM_BOOL);
+  parm01.addParm('useSmag3D',true,PARM_BOOL);
   parm01.addParm('viscC4leith',0,PARM_REAL);
   parm01.addParm('viscC4leithD',0,PARM_REAL);      
   parm01.addParm('viscC2leith',0,PARM_REAL);
   parm01.addParm('viscC2leithD',0,PARM_REAL); 
   parm01.addParm('viscC2smag',0,PARM_REAL); 
   parm01.addParm('viscC4smag',viscC4smag,PARM_REAL); 
-  
+  parm01.addParm('smag3D_coeff',smag3D_coeff,PARM_REAL); 
+
   %%% diffusivity
   parm01.addParm('diffKrT',diffKrT,PARM_REAL);
   parm01.addParm('diffKhT',diffKhT,PARM_REAL);  
+  parm01.addParm('diffKrS',diffKrS,PARM_REAL);
+  parm01.addParm('diffKhS',diffKhS,PARM_REAL);  
   %%% advection schemes
   parm01.addParm('tempAdvScheme',33,PARM_INT);
   parm01.addParm('saltAdvScheme',33,PARM_INT);
@@ -252,7 +259,11 @@ periodicExternalForcing = true;
   
   %%% Grid spacing increases with depth, but spacings exactly sum to H
   zidx = 1:Nr;
-  dz = H/Nr*ones(1,Nr);
+ % dz = H/Nr*ones(1,Nr);
+dz = [ones(1,35)*.3 linspace(.3,2,15)];
+
+
+
   zz = -cumsum((dz+[0 dz(1:end-1)])/2);
 
   %%% Store grid spacings
@@ -278,6 +289,9 @@ periodicExternalForcing = true;
   %%% Flat bottom  
   h = -H*ones(Nx,Ny);
   
+ h(:,1)=zeros;
+ h(:,end)=zeros;
+
   %%% Save as a parameter
   writeDataset(h,fullfile(inputpath,'bathyFile.bin'),ieee,prec);
   parm05.addParm('bathyFile','bathyFile.bin',PARM_STR); 
@@ -299,42 +313,44 @@ periodicExternalForcing = true;
        
   %%% Quasi-tanh-shaped T/S profiles
  %%%%South BC
- shelfthickness=0; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
-  Zpyc = -15-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
-  Wpyc = 10; %pycnocline width scale
+ shelfthickness=5; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
+  Zpyc = -10-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
+  Wpyc = 5; %pycnocline width scale
   Smin = 34.2;
   Smax = 34.7; %34.7
   Tmin = -0.6 ;% 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
-  Tmax= -0.1;  
+  Tmax= -0.15;  
   gam_h = 0.01;
   tRef = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
   sRef = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
   
   %deep interpolation (because you want nonzero stratifiction at depth)
- sRef(round((Nr/4)+(Nr/H)*shelfthickness):end)=linspace(sRef(round((Nr/4)+(Nr/H)*shelfthickness)),sRef(end),Nr-round((Nr/4)+(Nr/H)*shelfthickness)+1);
- sRef=smoothdata(sRef); % because the transition to interpolation produced sharp vertical gradients
+ %sRef(round(Nr/4)+shelfthickness:end)=linspace(sRef(round(Nr/4)+shelfthickness),sRef(end),Nr-round(Nr/4)-shelfthickness+1);
+ %sRef=smoothdata(sRef); % because the transition to interpolation produced sharp vertical gradients
 
- tRef(round(Nr/4):end)=linspace(tRef(round(Nr/4)),tRef(end),Nr-round(Nr/4)+1);
- tRef=smoothdata(tRef);
+ %tRef(round(Nr/4)+shelfthickness:end)=linspace(tRef(round(Nr/4)+shelfthickness),tRef(end),Nr-round(Nr/4)-shelfthickness+1);;
+ %tRef=smoothdata(tRef);
 
 
 %%%%North BC
-   Zpyc = -15; %%northern/outflow boundary pycnocline mid-depth
-  Wpyc = 10;
-  Smin = 33.95;
+   Zpyc = -10-shelfthickness; %%northern/outflow boundary pycnocline mid-depth
+  Wpyc = 5;
+  Smin = 34.2-.05;%33.95;
   Smax = 34.7; %
-  Tmin = -0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
+  Tmin = -.61;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
   Tmax= -0.15;  
   gam_h = 0.01;
   tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
   sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
 
 
- sRefout(round(Nr/4):end)=linspace(sRefout(round(Nr/4)),sRefout(end),Nr-round(Nr/4)+1);
- sRefout=smoothdata(sRefout);
+ %sRefout(round(Nr/4):end)=linspace(sRefout(round(Nr/4)),sRefout(end),Nr-round(Nr/4)+1);
+%sRefout(round(Nr/4):end)=sRef(round(Nr/4):end);
+ %sRefout=smoothdata(sRefout);%
 
- tRefout(round(Nr/4):end)=linspace(tRefout(round(Nr/4)),tRefout(end),Nr-round(Nr/4)+1);
- tRefout=smoothdata(tRefout);
+ %tRefout(round(Nr/4):end)=linspace(tRefout(round(Nr/4)),tRefout(end),Nr-round(Nr/4)+1);
+%tRefout(round(Nr/4):end)=tRef(round(Nr/4):end);
+% tRefout=smoothdata(tRefout);
 
   %%% Quasi-linear near-surface stratification
 %   Zpyc = 0;
@@ -441,8 +457,8 @@ periodicExternalForcing = true;
 
   %%% Upper bound for absolute horizontal fluid velocity (m/s)
   %%% At the moment this is just an estimate
-  Umax = 0.225;  
-  Wmax = 0.045; %%% NEEDS TO BE INCREASED FOR DEEP PYCNOCLINES
+  Umax = 0.225*.84/1;  
+  Wmax = 0.045*1.42857143/8.00*.84/1; %%% NEEDS TO BE INCREASED FOR DEEP PYCNOCLINES
   %%% Max gravity wave speed 
   cmax = 0;%max(Cig);
   %%% Max gravity wave speed using total ocean depth
@@ -1203,11 +1219,11 @@ phi0surf=zeros(Nx,Ny);
 fid=fopen(fullfile(inputpath,'SHELFICEloadAnomalyFile.bin'), 'w','b'); 
 fwrite(fid,phi0surf,prec);fclose(fid);
 
-shelfthickness=10;
+shelfthickness=5;
 
 depth=-shelfthickness; %default -15 deep channel
 icetopo=depth*ones(Nx,Ny);
-halfwidth=50; %25 for default half channel width
+halfwidth=30; %10 for default half channel width
 icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )=0;
 
 
@@ -1245,6 +1261,302 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
 
   
 
+  %%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%
+  %%%%% OBCS %%%%%
+  %%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%
+
+
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% OBCS SET-UP %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%
+
+
+  %%% To store parameter names and values
+  obcs_parm01 = parmlist;
+  obcs_parm02 = parmlist;
+  obcs_parm03 = parmlist;
+  obcs_parm04 = parmlist;
+  %obcs_parm05 = parmlist;
+  OBCS_PARM = {obcs_parm01,obcs_parm02,obcs_parm03,obcs_parm04};
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% DEFINE OPEN BOUNDARY TYPES (OBCS_PARM01) %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+
+  %%%%%% tides ^%%%%%%%% 
+  useOBCStides = use_tides;
+
+  tidalPeriod=[44714, 43200, 45570, 43082, 86164, 92950, 86637, 96726,1180300,2380706];
+%   tidalPeriod=[44714, 43200, 45570, 43082, 86164, 92950, 86637];
+
+  OBNamFile= 'OBNamFile.bin';
+  OBNphFile= 'OBNphFile.bin';
+  OBEamFile= 'OBEamFile.bin';
+  OBEphFile= 'OBEphFile.bin';
+
+
+
+  obcs_parm01.addParm('useOBCStides',useOBCStides,PARM_BOOL);
+
+  obcs_parm01.addParm('tidalPeriod',tidalPeriod,PARM_INTS);
+
+  obcs_parm01.addParm('OBNamFile',OBNamFile,PARM_STR);
+  obcs_parm01.addParm('OBNphFile',OBNphFile,PARM_STR);
+  obcs_parm01.addParm('OBEamFile',OBEamFile,PARM_STR);
+  obcs_parm01.addParm('OBEphFile',OBEphFile,PARM_STR);
+
+%}
+
+
+  %%% Enables an Orlanski radiation condition at the northern boundary
+
+
+    useOrlanskiNorth = false;
+
+    OB_Jsouth = 1*ones(1,Nx);
+%     OB_Iwest = 1*ones(1,Ny);
+    OB_Jnorth = -1*ones(1,Nx);
+  
+  %OB_Jnorth(1:idx_obcs_n) = 0;
+  %OB_Ieast(1:idx_obcs_e) = 0;
+
+
+ % obcs_parm01.addParm('useOrlanskiNorth',useOrlanskiNorth,PARM_BOOL);
+  obcs_parm01.addParm('OB_Jnorth',OB_Jnorth,PARM_INTS);
+  obcs_parm01.addParm('OB_Jsouth',OB_Jsouth,PARM_INTS);
+%   obcs_parm01.addParm('OB_Iwest',OB_Iwest,PARM_INTS);    
+
+
+
+    useOBCSsponge = true;
+   
+
+%     useOBCSsponge = false;
+
+    useOBCSprescribe = true;
+
+
+    OBNtFile = 'NBCt.bin';
+    OBNsFile = 'NBCs.bin';
+
+%     OBWtFile = 'OBWtFile.bin';
+
+
+    OBStFile = 'SBCt.bin';
+    OBSsFile = 'SBCs.bin';
+
+%     OBWsFile = 'OBWsFile.bin';
+
+%{
+  fid = fopen(fullfile(inputpath,OBNtFile),'r','b');
+  OBNa = fread(fid,[Nx 12],'real*8');
+  fclose(fid);
+
+
+    OBNhFile = 'OBNhFile.bin';
+    OBEhFile = 'OBEhFile.bin';
+%     OBWhFile = 'OBWhFile.bin';
+
+    OBNsnFile = 'OBNsnFile.bin';
+    OBEsnFile = 'OBEsnFile.bin';
+%     OBWsnFile = 'OBWsnFile.bin';
+
+    OBNuiceFile = 'OBNuiceFile.bin';
+    OBEuiceFile = 'OBEuiceFile.bin';
+% %     OBWuiceFile = 'OBWuiceFile.bin';
+% 
+    OBNviceFile = 'OBNviceFile.bin';
+    OBEviceFile = 'OBEviceFile.bin';
+%     OBWviceFile = 'OBWviceFile.bin';
+%}
+
+  obcs_parm01.addParm('useOBCSsponge',useOBCSsponge,PARM_BOOL);
+  obcs_parm01.addParm('useOBCSprescribe',useOBCSprescribe,PARM_BOOL);
+
+  obcs_parm01.addParm('OBNtFile',OBNtFile,PARM_STR);
+  obcs_parm01.addParm('OBNsFile',OBNsFile,PARM_STR);
+%   obcs_parm01.addParm('OBWtFile',OBWtFile,PARM_STR);  
+
+  obcs_parm01.addParm('OBStFile',OBStFile,PARM_STR);
+  obcs_parm01.addParm('OBSsFile',OBSsFile,PARM_STR);
+%   obcs_parm01.addParm('OBWsFile',OBWsFile,PARM_STR);
+
+
+
+shelfz=Nr;
+ny=Ny;nx=Nx;
+clear EBCu EBCs EBCt  WBCu WBCs WBCt NBCt NBCu NBCs 
+EBCu = zeros(ny,shelfz);
+EBCs = zeros(ny,shelfz);
+EBCt = zeros(ny,shelfz);
+EBCv = zeros(ny,shelfz);
+
+WBCu = zeros(ny,shelfz);
+WBCs = zeros(ny,shelfz);
+WBCt = zeros(ny,shelfz);
+WBCv = zeros(ny,shelfz);
+
+NBCu = zeros(nx,shelfz);
+NBCs = zeros(nx,shelfz);
+NBCt = zeros(nx,shelfz);
+NBCv = zeros(nx,shelfz);
+
+SBCu = zeros(nx,shelfz);
+SBCs = zeros(nx,shelfz);
+SBCt = zeros(nx,shelfz);
+SBCv = zeros(nx,shelfz);
+
+
+%repmat(linspace(saltini(round(h2loc/deltaX)-2,1,i),saltini(round(h2loc/deltaX)+50,1,i), 103),ny,1)'
+
+
+        NBCt = repmat(tRefout,[Nx,1]);
+        NBCs = repmat(sRefout,[Nx,1]);
+       
+        SBCt=repmat(tRef,[Nx,1]);
+        SBCs = repmat(sRef,[Nx,1]);
+
+
+
+% Apply barotropic velocity to balance input of runoff
+
+
+fid=fopen(fullfile(inputpath,'NBCt.bin'), 'w','b');  fwrite(fid,NBCt,prec);fclose(fid);
+fid=fopen(fullfile(inputpath,'NBCs.bin'), 'w','b');  fwrite(fid,NBCs,prec);fclose(fid);
+fid=fopen(fullfile(inputpath,'SBCt.bin'), 'w','b');  fwrite(fid,SBCt,prec);fclose(fid);
+fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclose(fid);
+
+  %%% Enforces mass conservation across the northern boundary by adding a
+  %%% barotropic inflow/outflow
+  %useOBCSbalance = true;
+  %OBCS_balanceFacN = 1;
+  %OBCS_balanceFacE = 0;
+%   OBCS_balanceFacS = 0;
+%   OBCS_balanceFacW = -1;
+  %obcs_parm01.addParm('useOBCSbalance',useOBCSbalance,PARM_BOOL);
+  %obcs_parm01.addParm('OBCS_balanceFacN',OBCS_balanceFacN,PARM_REAL);
+%  obcs_parm01.addParm('OBCS_balanceFacE',OBCS_balanceFacE,PARM_REAL);
+%   obcs_parm01.addParm('OBCS_balanceFacS',OBCS_balanceFacS,PARM_REAL);  
+%   obcs_parm01.addParm('OBCS_balanceFacW',OBCS_balanceFacW,PARM_REAL);  
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% ORLANSKI OPTIONS (OBCS_PARM02) %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+  %%% Velocity averaging time scale - must be larger than deltaT.
+  %%% The Orlanski radiation condition computes the characteristic velocity
+  %%% at the boundary by averaging the spatial derivative normal to the 
+  %%% boundary divided by the time step over this period.
+  %%% At the moment we're using the magic engineering factor of 3.
+%   cvelTimeScale = 3*deltaT;
+
+
+
+
+  %%% Max dimensionless CFL for Adams-Basthforth 2nd-order method
+%   CMAX = 0.45; 
+%   
+%   obcs_parm02.addParm('cvelTimeScale',cvelTimeScale,PARM_REAL);
+%   obcs_parm02.addParm('CMAX',CMAX,PARM_REAL);
+
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% Sponge Layer Parms (OBCS_PARM03) %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%% Values taken from SOSE.
+%%% Urelaxobcsinner = relaxation time scale at the innermost sponge layer point of a meridional OB
+%%% Vrelaxobcsinner = relaxation time scale at the innermost sponge layer point of a zonal OB
+%%% Urelaxobcsbound = relaxation time scale at the outermost sponge layer point of a meridional OB
+%%% Vrelaxobcsbound = relaxation time scale at the outermost sponge layer point of a zonal OB
+
+
+
+    Urelaxobcsinner = 21600;  %%% 10 days
+    Urelaxobcsbound = 2160;  %%% half a day
+    Vrelaxobcsinner = 21600;
+    Vrelaxobcsbound = 2160;
+
+%%%%%% sponge thickness - finer in high-res simulation due to placement of
+%%%%%% eastern boundary, increased number of gridpoints
+  %if (res_fac == 24)
+    spongethickness =round(Ny/10);
+  %else
+  %  spongethickness = round(10*res_fac/3);
+%     spongethickness = 5;
+  %end
+
+
+  obcs_parm03.addParm('Urelaxobcsinner',Urelaxobcsinner,PARM_REAL);
+  obcs_parm03.addParm('Urelaxobcsbound',Urelaxobcsbound,PARM_REAL);
+  obcs_parm03.addParm('Vrelaxobcsinner',Vrelaxobcsinner,PARM_REAL);
+  obcs_parm03.addParm('Vrelaxobcsbound',Vrelaxobcsbound,PARM_REAL);
+
+  obcs_parm03.addParm('spongethickness',spongethickness,PARM_INT);
+
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% Sea ice Sponge Parms (OBCS_PARM05) %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+  seaiceSpongeThickness = spongethickness;
+  Arelaxobcsinner = Urelaxobcsinner;
+  Arelaxobcsbound = Urelaxobcsbound;
+  Hrelaxobcsinner = Urelaxobcsinner;
+  Hrelaxobcsbound = Urelaxobcsbound;
+  SLrelaxobcsinner = Urelaxobcsinner;
+  SLrelaxobcsbound = Urelaxobcsbound;
+  SNrelaxobcsinner = Urelaxobcsinner;
+  SNrelaxobcsbound = Urelaxobcsbound;
+
+  obcs_parm05.addParm('Arelaxobcsinner',Arelaxobcsinner,PARM_REAL);
+  obcs_parm05.addParm('Arelaxobcsbound',Arelaxobcsbound,PARM_REAL);
+  obcs_parm05.addParm('Hrelaxobcsinner',Hrelaxobcsinner,PARM_REAL);
+  obcs_parm05.addParm('Hrelaxobcsbound',Hrelaxobcsbound,PARM_REAL);
+  obcs_parm05.addParm('SLrelaxobcsinner',SLrelaxobcsinner,PARM_REAL);
+  obcs_parm05.addParm('SLrelaxobcsbound',SLrelaxobcsbound,PARM_REAL);
+  obcs_parm05.addParm('SNrelaxobcsinner',SNrelaxobcsinner,PARM_REAL);
+  obcs_parm05.addParm('SNrelaxobcsbound',SNrelaxobcsbound,PARM_REAL);
+  obcs_parm05.addParm('seaiceSpongeThickness',seaiceSpongeThickness,PARM_INT);
+%}
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%% WRITE THE 'data.obcs' FILE %%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+  %%% Creates the 'data.obcs' file
+  write_data_obcs(inputpath,OBCS_PARM,listterm,realfmt);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   %%%%%%%%%%%%%%%%%%%%%%%
@@ -1280,38 +1592,28 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   ndiags = 0;
   
   diag_fields_avg = ...
-  {... 
-
-  'ETAN', ...  %%% SSH
-    'UVEL','VVEL','WVEL'...%%%velocities
-    'THETA', ... %%% Temperature
-    'SALT', ...
+  {...
+     'UV_VEL_Z','WU_VEL','WV_VEL', ... %%% Momentum fluxes
      'UVELSLT','VVELSLT','WVELSLT', ... %%% Salt fluxes
-     'UVELTH','VVELTH','WVELTH', ... %%% Temperature fluxes
-     'UV_VEL_Z','WU_VEL','WV_VEL'... %%% Momentum fluxes
-%  'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
-%   'SHIfwFlx'...%%'SHIhtFlx','SHIForcT','SHIForcS', ...  %%%%% Ice shelf melt
-
-
-%     'PHIHYD', ... %%% Pressure
+      'UVEL','VVEL','WVEL',... %%% Velocities
+      'THETA', ... %%% Temperature
+      'SALT', ... %%% Salinity
+      'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
+      'SHIfwFlx','SHIhtFlx','SHIForcT','SHIForcS', ...
+      'UVELTH','VVELTH','WVELTH' ... %%% Temperature fluxes
+  };
+  %     'PHIHYD', ... %%% Pressure
 %     'LaUH1TH','LaVH1TH','LaHw1TH','LaHs1TH' ... %%% LAYERS fluxes
 %     'ADVr_TH','ADVx_TH','ADVy_TH', ... %%%%% Advective fluxes of H.B.
 %     'KPPg_TH', ... %%%% KPP non-local flux of P.T.
 %     'DFrE_TH','DFrI_TH','DFxE_TH','DFyE_TH', ... %%%% Diffusive Fluxes
 %     'oceQsw','TOTTTEND','WTHMASS','TFLUX'...
 %      'UVELSQ','VVELSQ','WVELSQ',... %%% For Kinetic Energy
-    %%'ETAN',...
-%    'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
+   % 'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
 %      'SIarea','SIheff','SIhsnow','SIhsalt','SIuice','SIvice'...%%% Sea ice state
-%      'UVEL','VVEL','WVEL'... %%% Velocities
-%      'THETA', ... %%% Temperature
-%      'SALT', ... %%% Salinity
-%      'SHIfwFlx'...%%'SHIhtFlx','SHIForcT','SHIForcS', ...  %%%%% Ice shelf melt
-%    
-  };
-  
+
   numdiags_avg = length(diag_fields_avg);  
-  diag_freq_avg = 0.5*t1day;
+  diag_freq_avg = 1*t1day;
   diag_phase_avg = 0;    
      
   diag_parm01.addParm('diag_mnc',true,PARM_BOOL);  
@@ -1341,9 +1643,9 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   
   numdiags_inst = length(diag_fields_inst);  
   if (use_3D)
-    diag_freq_inst = 0.1*t1day;
+    diag_freq_inst = 0.05*t1day;
   else
-    diag_freq_inst = 0.1*t1day;
+    diag_freq_inst = 0.05*t1day;
   end
   diag_phase_inst = 0;
   
@@ -1395,9 +1697,10 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   packages.addParm('useDiagnostics',true,PARM_BOOL);
   packages.addParm('useSHELFICE',true,PARM_BOOL);
   %packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
-  packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
-  packages.addParm('useSEAICE',use_seaIce,PARM_BOOL);  
-  packages.addParm('useEXF',use_seaIce,PARM_BOOL);  
+  %packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
+  packages.addParm('useOBCS',true,PARM_BOOL);     
+  packages.addParm('useSEAICE',false,PARM_BOOL);  
+  packages.addParm('useEXF',false,PARM_BOOL);  
   
   %%% Create the data.pkg file
   write_data_pkg(inputpath,PACKAGE_PARM,listterm,realfmt);
@@ -1429,7 +1732,7 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
   if (use_seaIce)
     ALL_PARMS = [ALL_PARMS SEAICE_PARM EXF_PARM];
   else
-    ALL_PARMS = [ALL_PARMS RBCS_PARM];
+    ALL_PARMS = [ALL_PARMS OBCS_PARM];
   end    
   write_matlab_params(inputpath,ALL_PARMS,realfmt);
   
