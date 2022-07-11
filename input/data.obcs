@@ -1,0 +1,39 @@
+# ===================
+# | OBCS parameters |
+# ===================
+
+# Open boundary types and locations
+ &OBCS_PARM01
+ OB_Jnorth=-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+ OB_Jsouth=1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+ useOBCSsponge=.TRUE.,
+ useOBCSprescribe=.TRUE.,
+ OBNtFile='NBCt.bin',
+ OBNsFile='NBCs.bin',
+ OBStFile='SBCt.bin',
+ OBSsFile='SBCs.bin',
+ &
+
+# Orlanski parameters
+ &OBCS_PARM02
+ &
+
+# Sponge-layer parameters
+ &OBCS_PARM03
+ Urelaxobcsinner=2.16000000e+04,
+ Urelaxobcsbound=2.16000000e+03,
+ Vrelaxobcsinner=2.16000000e+04,
+ Vrelaxobcsbound=2.16000000e+03,
+ spongethickness=10,
+ &
+
+# Stevens parameters
+ &OBCS_PARM04
+ &
+
