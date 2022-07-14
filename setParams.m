@@ -73,7 +73,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   H = 41.5; %%% Domain size in z 
   g = 9.81; %%% Gravity
   Omega = 2*pi*366/365/86400;  
-  lat0 = -70; %%% Latitude at southern boundary
+  lat0 = 77; %%% Latitude at southern boundary
   f0 = 0; % f0 = 2*Omega*sind(lat0); %%% Coriolis parameter      
   rho0 = 1000;  
   
@@ -259,8 +259,11 @@ periodicExternalForcing = true;
   
   %%% Grid spacing increases with depth, but spacings exactly sum to H
   zidx = 1:Nr;
- dz = H/Nr*ones(1,Nr);
-%dz = [ones(1,35)*.3 linspace(.3,2,15)];
+ %dz = H/Nr*ones(1,Nr);
+%dz = [ones(1,round(0.7*Nr))*.3 linspace(.3,2,Nr-round(0.7*Nr))]; 
+dz = [ones(1,45)*.3 linspace(.3,2,15)];
+%resolution in the top 70% of Nr gridopints is 0.3 m and resolution in
+%bottom 30% of NR gridpts linearly telescopes from 0.3 to 2m vertical res.
 
 
 
@@ -335,9 +338,9 @@ periodicExternalForcing = true;
 %%%%North BC
    Zpyc = -10-shelfthickness; %%northern/outflow boundary pycnocline mid-depth
   Wpyc = 5;
-  Smin = 34.2-.025;%33.95;
+  Smin = 34.2-.05;%33.95;
   Smax = 34.7; %
-  Tmin = -.605;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
+  Tmin = -.61;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
   Tmax= -0.15;  
   gam_h = 0.01;
   tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
@@ -1598,6 +1601,7 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
       'UVEL','VVEL','WVEL',... %%% Velocities
       'THETA', ... %%% Temperature
       'SALT', ... %%% Salinity
+      'PHIHYD','PHI_NH', 'Vm_dPhiY', 'Um_dPhiX', ... %%% Pressure
       'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
       'SHIfwFlx','SHIhtFlx','SHIForcT','SHIForcS', ...
       'UVELTH','VVELTH','WVELTH' ... %%% Temperature fluxes
