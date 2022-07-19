@@ -74,7 +74,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   g = 9.81; %%% Gravity
   Omega = 2*pi*366/365/86400;  
   lat0 = 77; %%% Latitude at southern boundary
-  f0 = 0; % f0 = 2*Omega*sind(lat0); %%% Coriolis parameter      
+  f0 = 2*Omega*sind(lat0); % f0 = 2*Omega*sind(lat0); %%% Coriolis parameter      
   rho0 = 1000;  
   
   %%% Diffusion parameters
