@@ -338,7 +338,7 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %%%%North BC
    Zpyc = -10-shelfthickness; %%northern/outflow boundary pycnocline mid-depth
   Wpyc = 5;
-  Smin = 34.2-.05;%33.95;
+  Smin = 34.2-.1;%33.95;
   Smax = 34.7; %
   Tmin = -.61;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
   Tmax= -0.15;  
