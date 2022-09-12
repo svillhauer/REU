@@ -74,7 +74,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   g = 9.81; %%% Gravity
   Omega = 2*pi*366/365/86400;  
   lat0 = 77; %%% Latitude at southern boundary
-  f0 = 2*Omega*sind(lat0); % f0 = 2*Omega*sind(lat0); %%% Coriolis parameter      
+  f0 = 0; %2*Omega*sind(lat0); % f0 = 2*Omega*sind(lat0); %%% Coriolis parameter      
   rho0 = 1000;  
   
   %%% Diffusion parameters
@@ -338,7 +338,7 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %%%%North BC
    Zpyc = -10-shelfthickness; %%northern/outflow boundary pycnocline mid-depth
   Wpyc = 5;
-  Smin = 34.2-.1;%33.95;
+  Smin = 34.2-.05;%33.95;
   Smax = 34.7; %
   Tmin = -.61;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
   Tmax= -0.15;  
@@ -1605,10 +1605,20 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
       'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
       'SHIfwFlx','SHIhtFlx','SHIForcT','SHIForcS', ...
       'UVELTH','VVELTH','WVELTH' ... %%% Temperature fluxes
+      'Um_Advec', 'Vm_Advec', 'Wm_Advec', ... %%%%% Advective fluxes
+      'VSidDrag', ... %%% Momentum tendency from side drag 
+      'Vm_Diss', 'Vm_ImplD', ... %%% Momentum tendency from dissipation 
+      'Vm_Cori', ... %%% Momentum tendency from coriolis
+      'Vm_Ext', ... %%% Momentum tendency from external forcing 
+      'Vm_AdvZ3', 'Vm_AdvRe', ... %%% Momentum tendency from vorticity and vertical advection
+      'TOTVTEND', ... %%% V tendency
+
+
   };
   %     'PHIHYD', ... %%% Pressure
 %     'LaUH1TH','LaVH1TH','LaHw1TH','LaHs1TH' ... %%% LAYERS fluxes
 %     'ADVr_TH','ADVx_TH','ADVy_TH', ... %%%%% Advective fluxes of H.B.
+%     'Um_Advec', 'Vm_Advec', 'Wm_Advec', %%%%% Advective fluxes 
 %     'KPPg_TH', ... %%%% KPP non-local flux of P.T.
 %     'DFrE_TH','DFrI_TH','DFxE_TH','DFyE_TH', ... %%%% Diffusive Fluxes
 %     'oceQsw','TOTTTEND','WTHMASS','TFLUX'...
