@@ -34,10 +34,10 @@
 
 # Sponge-layer parameters
  &OBCS_PARM03
- Urelaxobcsinner=2.16000000e+04,
- Urelaxobcsbound=2.16000000e+03,
- Vrelaxobcsinner=2.16000000e+04,
- Vrelaxobcsbound=2.16000000e+03,
+ Urelaxobcsinner=2.16000000e+03,
+ Urelaxobcsbound=2.16000000e+02,
+ Vrelaxobcsinner=2.16000000e+03,
+ Vrelaxobcsbound=2.16000000e+02,
  spongethickness=10,
  &
 

@@ -371,8 +371,8 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(tRef,zz); hold on
-    plot(tRefout,zz);
+    plot(tRef,zz/1000); hold on
+    plot(tRefout,zz/1000);
     xlabel('\theta_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference temperature');
@@ -383,8 +383,8 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(sRef,zz); hold on
-     plot(sRefout,zz);
+    plot(sRef,zz/1000); hold on
+     plot(sRefout,zz/1000);
     xlabel('S_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference salinity');
@@ -1487,10 +1487,10 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
 
 
 
-    Urelaxobcsinner = 21600;  %%% 10 days
-    Urelaxobcsbound = 2160;  %%% half a day
-    Vrelaxobcsinner = 21600;
-    Vrelaxobcsbound = 2160;
+    Urelaxobcsinner = 2160;  %%% 10 days
+    Urelaxobcsbound = 216;  %%% half a day
+    Vrelaxobcsinner = 2160;
+    Vrelaxobcsbound = 216;
 
 %%%%%% sponge thickness - finer in high-res simulation due to placement of
 %%%%%% eastern boundary, increased number of gridpoints
@@ -1751,3 +1751,4 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   write_matlab_params(inputpath,ALL_PARMS,realfmt);
   
 end
+
