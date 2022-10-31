@@ -56,7 +56,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   %%%%% SIMULATION CONTROL PARAMETERS %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-  nonHydrostatic = false; %%% Whether to run in nonhydrostatic mode
+  nonHydrostatic = true; %%% Whether to run in nonhydrostatic mode
   use_seaIce = false; %%% Whether to run with sea ice (not yet implemented)
   use_3D = true; %%% Whether to run a 3D vs 2D simulation
   Ypoly = 0; %%% Latitudinal location 
@@ -257,9 +257,9 @@ periodicExternalForcing = true;
   %%% Plotting mesh
   [Y,X] = meshgrid(yy,xx);
   
-  %%% Grid spacing increases with depth, but spacings exactly sum to H
-  zidx = 1:Nr;
- %dz = H/Nr*ones(1,Nr);
+%%% Grid spacing increases with depth, but spacings exactly sum to H
+zidx = 1:Nr;
+%dz = H/Nr*ones(1,Nr);
 %dz = [ones(1,round(0.7*Nr))*.3 linspace(.3,2,Nr-round(0.7*Nr))]; 
 dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %resolution in the top 70% of Nr gridopints is 0.3 m and resolution in
@@ -371,8 +371,8 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(tRef,zz/1000); hold on
-    plot(tRefout,zz/1000);
+    plot(tRef,zz); hold on
+    plot(tRefout,zz);
     xlabel('\theta_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference temperature');
@@ -383,8 +383,8 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
     figure(fignum);
     fignum = fignum + 1;
     clf;
-    plot(sRef,zz/1000); hold on
-     plot(sRefout,zz/1000);
+    plot(sRef,zz); hold on
+     plot(sRefout,zz);
     xlabel('S_r_e_f');
     ylabel('z','Rotation',0);
     title('Reference salinity');
@@ -1710,7 +1710,7 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   
   packages.addParm('useDiagnostics',true,PARM_BOOL);
   packages.addParm('useSHELFICE',true,PARM_BOOL);
-  %packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
+  packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
   %packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
   packages.addParm('useOBCS',true,PARM_BOOL);     
   packages.addParm('useSEAICE',false,PARM_BOOL);  
