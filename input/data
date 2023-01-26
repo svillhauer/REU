@@ -36,7 +36,7 @@
  no_slip_sides=.FALSE.,
  no_slip_bottom=.FALSE.,
  bottomDragLinear=0.00000000e+00,
- bottomDragQuadratic=0.00000000e+00,
+ bottomDragQuadratic=2.00000000e-03,
  f0=0.00000000e+00,
  gravity=9.81000000e+00,
  rhonil=1.00000000e+03,
@@ -68,7 +68,7 @@
  &PARM03
  momDissip_In_AB=.FALSE.,
  tracForcingOutAB=1,
- nIter0=0,
+ nIter0=227963,
  abEps=1.00000000e-01,
  chkptFreq=4.32000000e+03,
  pChkptFreq=4.32000000e+03,
