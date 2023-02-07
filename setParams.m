@@ -319,16 +319,43 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
  shelfthickness=5; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
   Zpyc = -10-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
   Wpyc = 5; %pycnocline width scale
-  Smin = 34.0350; %34.2; %34.2;
-  Smax = 34.4175; %34.22; %34.22; %34.7
-  Tmin = -0.6825; %-0.6; %-0.6 ;% 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
-  Tmax= -0.2576; %-0.15; %-0.15;  
+  %Smin = 34.0350; %34.2; %34.2;
+  %Smax = 34.4175; %34.22; %34.22; %34.7
+  %Tmin = -0.6825; %-0.6; %-0.6 ;% 0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
+  %Tmax= -0.2576; %-0.15; %-0.15;  
   gam_h = 0.01;
-  tRef = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %repmat(Tmin,1,60); %Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
-  saltmx = Smin:(Smax-Smin)/(length(zz)-1):Smax;
-  depthmx = 0:(-30)/59:-30;
-  sRef =  Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %interp1(depthmx,saltmx,zz,'linear'); %Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
-  
+  %tRef = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %repmat(Tmin,1,60); %Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
+  %saltmx = Smin:(Smax-Smin)/(length(zz)-1):Smax;
+
+  %sRef =  Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %interp1(depthmx,saltmx,zz,'linear'); %Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
+ ctd26 = readtable('PetermannIceShelf_26_1.dat');
+  ctd16 = readtable('PetermannIceShelf_03_1.dat'); 
+  ctd26new = table2array(ctd26);
+  ctd16new = table2array(ctd16);
+ctd16new = sortrows(ctd16new);
+ctd26new = sortrows(ctd26new);
+ctd16new = ctd16new(4813:8658,:);
+ctd26new = ctd26new(3512:4507,:);
+[~,u1] = unique(ctd16new(:,1),'stable');
+[~,u2] = unique(ctd26new(:,1),'stable');
+ctd16new = ctd16new(u1,:);
+ctd26new = ctd26new(u2,:);
+
+new16x = ctd16new(1,1):min(diff(ctd16new)):ctd16new(end,1);
+salt16 = interp1(ctd16new(:,1), ctd16new(:,4), new16x);
+temp16 = interp1(ctd16new(:,1), ctd16new(:,2), new16x);
+new26x = ctd26new(1,1):min(diff(ctd26new)):ctd26new(end,1);
+salt26 = interp1(ctd26new(:,1), ctd26new(:,4), new26x);
+temp26 = interp1(ctd26new(:,1), ctd26new(:,2), new26x);
+
+depth16mx = 0:(-30)/(length(new16x)-1):-30;
+depth26mx = 0:(-30)/(length(new26x)-1):-30;
+
+
+
+  tRef = interp1(depth16mx,temp16,zz,'spline'); 
+  sRef =  interp1(depth16mx,salt16,zz,'spline');
+
   %interp1(depthmx,saltmx,zz,'linear');
   %deep interpolation (because you want nonzero stratifiction at depth)
  %sRef(round(Nr/4)+shelfthickness:end)=linspace(sRef(round(Nr/4)+shelfthickness),sRef(end),Nr-round(Nr/4)-shelfthickness+1);
@@ -341,16 +368,28 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %%%%North BC
    Zpyc = -10-shelfthickness; %%northern/outflow boundary pycnocline mid-depth
   Wpyc = 5;
+  %{
   Smin = 33.9911; %34.2-.2;%33.95;
   Smax = 34.4091; %34.02; %34.7 %34.02
   Tmin = -0.6764; %-.61;%-0.65 ;%0.0901-0.0575*Smin; %%% MITgcm surface freezing temperature
   Tmax=  -0.2586; %-0.15;  
+  %}
   gam_h = 0.01;
-  tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %repmat(Tmin,1,60); %Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
-  saltmx = Smin:(Smax-Smin)/(length(zz)-1):Smax;
-  depthmx = 0:(-30)/59:-30;
-  sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %interp1(depthmx,saltmx,zz,'linear'); %Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
+  %tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %repmat(Tmin,1,60); %Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
+  %saltmx = Smin:(Smax-Smin)/(length(zz)-1):Smax;
+  depthmx = 0:(-length(ctd26new(:,1)))/59:-30;
+  %sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %interp1(depthmx,saltmx,zz,'linear'); %Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
 
+
+  tRefout = interp1(depth26mx,temp26,zz,'spline'); 
+  sRefout =  interp1(depth26mx,salt26,zz,'spline');
+
+
+diffsalt = (sRefout - sRef)./10;
+difftemp = (tRefout - tRef)./10;
+sRefout = sRef +diffsalt; 
+
+tRefout = tRefout +difftemp;
 % interp1(depthmx,saltmx,zz,'linear');
  %sRefout(round(Nr/4):end)=linspace(sRefout(round(Nr/4)),sRefout(end),Nr-round(Nr/4)+1);
 %sRefout(round(Nr/4):end)=sRef(round(Nr/4):end);
@@ -1253,6 +1292,7 @@ SHELFICEheatTransCoeff = 0;
 SHELFICEwriteState = true;
 %SHELFICEselectDragQuadr = 1;
 
+
 shelfice_parm01.addParm('SHELFICEloadAnomalyFile',SHELFICEloadAnomalyFile,PARM_STR);
 shelfice_parm01.addParm('SHELFICEtopoFile',SHELFICEtopoFile,PARM_STR);
 shelfice_parm01.addParm('SHELFICEuseGammaFrict',SHELFICEuseGammaFrict,PARM_BOOL);
@@ -1608,7 +1648,7 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
       'SALT', ... %%% Salinity
       'PHIHYD','PHI_NH', 'Vm_dPhiY', 'Um_dPhiX', ... %%% Pressure
       'SHIgammT','SHIgammS','SHIuStar','SHI_mass', ... %%%%% Ice shelf melt
-      'SHIfwFlx','SHIhtFlx','SHIForcT','SHIForcS', 'SHI_TauY', ... 
+      'SHIfwFlx','SHIhtFlx','SHIForcT','SHIForcS', 'SHI_TauY', 'SHI_TauX', ... 
       'UVELTH','VVELTH','WVELTH', ... %%% Temperature fluxes
       'Um_Advec', 'Vm_Advec', 'Wm_Advec', ... %%%%% Advective fluxes
       'VSidDrag', ... %%% Momentum tendency from side drag 

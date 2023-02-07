@@ -53,6 +53,7 @@
  vectorInvariantMomentum=.TRUE.,
  useJamartWetPoints=.TRUE.,
  useJamartMomAdv=.TRUE.,
+ selectImplicitDrag = 0,
  &
 
 # Elliptic solver parameters
@@ -68,7 +69,7 @@
  &PARM03
  momDissip_In_AB=.FALSE.,
  tracForcingOutAB=1,
- nIter0=227963,
+ nIter0=0,
  abEps=1.00000000e-01,
  chkptFreq=4.32000000e+03,
  pChkptFreq=4.32000000e+03,
