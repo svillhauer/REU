@@ -389,7 +389,7 @@ diffsalt = (sRefout - sRef)./10;
 difftemp = (tRefout - tRef)./10;
 sRefout = sRef +diffsalt; 
 
-tRefout = tRefout +difftemp;
+tRefout = tRef +difftemp;
 % interp1(depthmx,saltmx,zz,'linear');
  %sRefout(round(Nr/4):end)=linspace(sRefout(round(Nr/4)),sRefout(end),Nr-round(Nr/4)+1);
 %sRefout(round(Nr/4):end)=sRef(round(Nr/4):end);
@@ -1266,11 +1266,11 @@ phi0surf=zeros(Nx,Ny);
 fid=fopen(fullfile(inputpath,'SHELFICEloadAnomalyFile.bin'), 'w','b'); 
 fwrite(fid,phi0surf,prec);fclose(fid);
 
-shelfthickness=5;%5
+shelfthickness=30;%5
 
 depth=-shelfthickness; %default -15 deep channel
 icetopo=depth*ones(Nx,Ny);
-halfwidth=30; %30 %10 for default half channel width
+halfwidth=150; %30 %10 for default half channel width
 icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )=0;
 
 
