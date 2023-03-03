@@ -261,10 +261,10 @@ periodicExternalForcing = true;
   zidx = 1:Nr;
  %dz = H/Nr*ones(1,Nr);
 %dz = [ones(1,round(0.7*Nr))*.3 linspace(.3,2,Nr-round(0.7*Nr))]; 
-dz = [ones(1,45)*.3 linspace(.3,2,15)];
+%dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %resolution in the top 70% of Nr gridopints is 0.3 m and resolution in
 %bottom 30% of NR gridpts linearly telescopes from 0.3 to 2m vertical res.
-
+dz = [ones(1,45)*.3 linspace(.3,2,15)];
 
 
   zz = -cumsum((dz+[0 dz(1:end-1)])/2);
@@ -316,7 +316,7 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
        
   %%% Quasi-tanh-shaped T/S profiles
  %%%%South BC
- shelfthickness=5; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
+ shelfthickness=12.15; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
   Zpyc = -10-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
   Wpyc = 5; %pycnocline width scale
   %Smin = 34.0350; %34.2; %34.2;
@@ -1266,12 +1266,12 @@ phi0surf=zeros(Nx,Ny);
 fid=fopen(fullfile(inputpath,'SHELFICEloadAnomalyFile.bin'), 'w','b'); 
 fwrite(fid,phi0surf,prec);fclose(fid);
 
-shelfthickness=30;%5
+shelfthickness=12.15;%5
 
 depth=-shelfthickness; %default -15 deep channel
 icetopo=depth*ones(Nx,Ny);
 halfwidth=150; %30 %10 for default half channel width
-icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )=0;
+icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )= 0;
 
 
 fid=fopen(fullfile(inputpath,'SHELFICEtopoFile.bin'), 'w','b'); 
