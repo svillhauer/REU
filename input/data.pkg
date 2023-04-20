@@ -6,7 +6,7 @@
  &PACKAGES
  useDiagnostics=.TRUE.,
  useSHELFICE=.TRUE.,
- useOBCS=.TRUE.,
+ useRBCS=.TRUE.,
  useSEAICE=.FALSE.,
  useEXF=.FALSE.,
  &

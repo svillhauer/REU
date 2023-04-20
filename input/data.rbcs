@@ -14,8 +14,12 @@
  tauRelaxV=4.32000000e+03,
  relaxTFile='sponge_temp.bin',
  relaxSFile='sponge_salt.bin',
+ relaxUFile='sponge_uvel.bin',
+ relaxVFile='sponge_vvel.bin',
  relaxMaskFile(1)='rbcs_temp_mask.bin',
  relaxMaskFile(2)='rbcs_salt_mask.bin',
+ relaxMaskUFile='rbcs_uvel_mask.bin',
+ relaxMaskVFile='rbcs_vvel_mask.bin',
  &
 
 # ptracer parameters
