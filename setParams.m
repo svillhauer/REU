@@ -60,7 +60,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   use_seaIce = false; %%% Whether to run with sea ice (not yet implemented)
   use_3D = true; %%% Whether to run a 3D vs 2D simulation
   Ypoly = 0; %%% Latitudinal location 
-  Wpoly = 5*m1km; %%% Latitudinal width
+  Wpoly = 5*m1km; %%% Latitudinal width 
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %%%%% FIXED PARAMETER VALUES %%%%%
@@ -70,7 +70,7 @@ function nTimeSteps = setParams (inputpath,codepath,listterm,Nx,Ny,Nr)
   nIter0 = 0; %%% Initial iteration 
   Lx = 1*m1km; %%% Domain size in x 
   Ly = 1*m1km; %%% Domain size in y   
-  H = 41.5; %%% Domain size in z 
+  H = 33.75; %29.85; %29.75; %29.6500; %41.5; %%% Domain size in z 
   g = 9.81; %%% Gravity
   Omega = 2*pi*366/365/86400;  
   lat0 = 77; %%% Latitude at southern boundary
@@ -129,7 +129,7 @@ periodicExternalForcing = true;
   parm01.addParm('viscC2leithD',0,PARM_REAL); 
   parm01.addParm('viscC2smag',0,PARM_REAL); 
   parm01.addParm('viscC4smag',viscC4smag,PARM_REAL); 
-  parm01.addParm('smag3D_coeff',smag3D_coeff,PARM_REAL); 
+  parm01.addParm('smag3D_coeff',smag3D_coeff,PARM_REAL);
 
   %%% diffusivity
   parm01.addParm('diffKrT',diffKrT,PARM_REAL);
@@ -152,7 +152,8 @@ periodicExternalForcing = true;
   parm01.addParm('no_slip_sides',false,PARM_BOOL);
   parm01.addParm('no_slip_bottom',false,PARM_BOOL);
   parm01.addParm('bottomDragLinear',0,PARM_REAL);
-  parm01.addParm('bottomDragQuadratic',2e-3,PARM_REAL); %2e-3
+  parm01.addParm('bottomDragQuadratic',0,PARM_REAL); %2e-3
+  %parm01.addParm('sideDragFactor',2,PARM_REAL);
   %%% physical parameters
   parm01.addParm('f0',f0,PARM_REAL);
   parm01.addParm('gravity',g,PARM_REAL);
@@ -261,14 +262,16 @@ periodicExternalForcing = true;
   zidx = 1:Nr;
  %dz = H/Nr*ones(1,Nr);
 %dz = [ones(1,round(0.7*Nr))*.3 linspace(.3,2,Nr-round(0.7*Nr))]; 
-dz = [ones(1,45)*.3 linspace(.3,2,15)];
+%dz = [ones(1,45)*.3 linspace(.3,2,15)];
 %resolution in the top 70% of Nr gridopints is 0.3 m and resolution in
 %bottom 30% of NR gridpts linearly telescopes from 0.3 to 2m vertical res.
+dz = [ones(1,55)*.3 linspace(.3,2,15)]; %[ones(1,53)*.3 linspace(.3,2,20)];  %[ones(1,53)*.3 linspace(.3,1.4,17)];
+%dz = [ones(1,200)*.3]; 
+%dz=[ones(1,100)]* H/Nr;
 
-
+%dz = [ones(1,45)*.3 linspace(.3,2,15)];
 
   zz = -cumsum((dz+[0 dz(1:end-1)])/2);
-
   %%% Store grid spacings
   parm04.addParm('delX',dx,PARM_REALS);
   parm04.addParm('delY',dy,PARM_REALS);
@@ -292,8 +295,8 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
   %%% Flat bottom  
   h = -H*ones(Nx,Ny);
   
- h(:,1)=zeros;
- h(:,end)=zeros;
+ %h(:,1)=zeros;
+ %h(:,end)=zeros;
 
   %%% Save as a parameter
   writeDataset(h,fullfile(inputpath,'bathyFile.bin'),ieee,prec);
@@ -316,7 +319,7 @@ dz = [ones(1,45)*.3 linspace(.3,2,15)];
        
   %%% Quasi-tanh-shaped T/S profiles
  %%%%South BC
- shelfthickness=5; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
+ shelfthickness=15.75; %idea here is to lower T and S profiles by shelfthickness and to make the surface shelfthickness layer relatively unstratified
   Zpyc = -10-shelfthickness; %southern/inflow boundary pycnocline mid-depth (depth scale)
   Wpyc = 5; %pycnocline width scale
   %Smin = 34.0350; %34.2; %34.2;
@@ -348,8 +351,8 @@ new26x = ctd26new(1,1):min(diff(ctd26new)):ctd26new(end,1);
 salt26 = interp1(ctd26new(:,1), ctd26new(:,4), new26x);
 temp26 = interp1(ctd26new(:,1), ctd26new(:,2), new26x);
 
-depth16mx = 0:(-30)/(length(new16x)-1):-30;
-depth26mx = 0:(-30)/(length(new26x)-1):-30;
+depth16mx = 0:(-H)/(length(new16x)-1):-H;
+depth26mx = 0:(-H)/(length(new26x)-1):-H;
 
 
 
@@ -377,7 +380,7 @@ depth26mx = 0:(-30)/(length(new26x)-1):-30;
   gam_h = 0.01;
   %tRefout = Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %repmat(Tmin,1,60); %Tmin + (Tmax-Tmin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2));
   %saltmx = Smin:(Smax-Smin)/(length(zz)-1):Smax;
-  depthmx = 0:(-length(ctd26new(:,1)))/59:-30;
+  depthmx = 0:(-length(ctd26new(:,1)))/(length(dz)-1):-H;
   %sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); %interp1(depthmx,saltmx,zz,'linear'); %Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2)-sqrt((1+(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((zz-Zpyc)/Wpyc).^2))/(1+gam_h)^(1/2)); 
 
 
@@ -540,7 +543,7 @@ tRefout = tRef +difftemp;
     deltaT = min([deltaT deltaT_vadv]);
   end
   deltaT = round(deltaT);
-  deltaT=deltaT/7; %ad hoc: we found that the normal dT wasn't working (approx. dT=14s)
+  deltaT=deltaT/30; %ad hoc: we found that the normal dT wasn't working (approx. dT=14s)
 
   nTimeSteps = ceil(simTime/deltaT);
   simTimeAct = nTimeSteps*deltaT;
@@ -703,8 +706,8 @@ tRefout = tRef +difftemp;
     
   useRBCtemp = true;
   useRBCsalt = true;
-  useRBCuVel = false;
-  useRBCvVel = false;
+  useRBCuVel = true;
+  useRBCvVel = true;
   tauRelaxT = 0.1*t1day;
   tauRelaxS = 0.1*t1day;
   tauRelaxU = 0.05*t1day;
@@ -724,7 +727,7 @@ tRefout = tRef +difftemp;
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   %tRefout (outflowing/north BC T/S) defined above
-
+%{
   for i=1:size(tRef,2)
 Tmat(i,:)=linspace(tRef(1,i), tRefout(1,i),Ny);
 Smat(i,:)=linspace(sRef(1,i), sRefout(1,i),Ny);
@@ -735,9 +738,59 @@ Tmatfinal=permute(Tmatfull,[3,2,1]);
 Smatfull=repmat(Smat,[1 1 Nx]);
 Smatfinal=permute(Smatfull,[3,2,1]);
 
+%}
+%%% Setting lower quarter of domain to be nudging region 
 
 
+%{
+lqrt = zz(end)-(zz(end)/4);
 
+saltnorth = sRefout(end-10:end);
+saltsouth = sRef(end-10:end);
+tempnorth = tRefout(end-10:end);
+tempsouth = tRef(end-10:end); 
+
+tempfinal = -2*ones(1,11);
+saltfinal = 35*ones(1,11);
+%}
+%{
+  for i=1:size(tempsouth,2)
+Tmat(i,:)=linspace(tempsouth(1,i), tempnorth(1,i),Ny);
+Smat(i,:)=linspace(saltsouth(1,i), saltnorth(1,i),Ny);
+  end
+%}
+  
+  %{
+%northern conditions
+  for i=1:size(tempnorth,2)
+Tmatnorth(i,:)=linspace(tempnorth(1,i), tempfinal(1,i),Ny);
+Smatnorth(i,:)=linspace(saltnorth(1,i), saltfinal(1,i),Ny);
+  end
+%}
+ %final 
+
+ tRef=linspace(-0.7, -.25,Nr);
+ sRef=linspace(34,34.15,Nr);
+
+ % for i=1:size(tRef,2)
+%Tmat(i,:)=linspace(tRef(1,i), tRefout(1,i),Ny);
+%Smat(i,:)=linspace(sRef(1,i), sRefout(1,i),Ny);
+ % end
+
+  for i=1:size(tRef,2)
+Tmat(i,:)=linspace(tRef(1,i), tRef(1,i),Ny);
+Smat(i,:)=linspace(sRef(1,i), sRef(1,i),Ny);
+  end
+
+ Tmatfull = repmat(Tmat,[1 1 Nx]);
+ Tmatfinal = permute(Tmatfull,[3,2,1]);
+ 
+
+Smatfull = repmat(Smat,[1 1 Nx]);
+Smatfinal = permute(Smatfull,[3,2,1]);
+
+vvelfinal = 0.1*ones(Nx,Ny,Nr);
+uvelfinal = 0*ones(Nx,Ny,Nr);
   
   %%%%%%%%%%%%%%%%%%%%%%%%
   %%%%% INITIAL DATA %%%%%
@@ -758,14 +811,34 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   %end
   
   %%% Add some random noise
-  hydroTh = hydroTh + tNoise*(2*rand(Nx,Ny,Nr)-1);
-  hydroSa = hydroSa + sNoise*(2*rand(Nx,Ny,Nr)-1);
+  hydroTh = hydroTh + tNoise*(0*rand(Nx,Ny,Nr)-0);
+  hydroSa = hydroSa + sNoise*(0*rand(Nx,Ny,Nr)-0);
+
+
+  %%% Adiing initial velocity 
+  
+  
+  vvelinitial=zeros(Nx,Ny,Nr);
+  for i = 1:Nr
+      vvelinitial(:,:,i) = vvelfinal(:,:,i) - (1/2)*(vvelfinal(:,:,i)/Nr)*(Nr-i);
+  end
+  
+  %vvelinitial = rdmdsWrapper(fullfile('/Users/sarahvillhauer/Desktop/MITgcm-master/MITgcm_SC/experiments/channel/icetopotest','results','VVEL_inst'),249231); 
+
+  %vvelinitial = vvelfinal;
+
   
   %%% Write to data files
   writeDataset(hydroTh,fullfile(inputpath,'hydrogThetaFile.bin'),ieee,prec); 
   parm05.addParm('hydrogThetaFile','hydrogThetaFile.bin',PARM_STR);
+  
   writeDataset(hydroSa,fullfile(inputpath,'hydrogSaltFile.bin'),ieee,prec); 
   parm05.addParm('hydrogSaltFile','hydrogSaltFile.bin',PARM_STR);
+
+  
+  writeDataset(vvelinitial,fullfile(inputpath,'vVelInitFile.bin'),ieee,prec); 
+  parm05.addParm('vVelInitFile','vVelInitFile.bin',PARM_STR);
+
   
   
   
@@ -788,7 +861,13 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   rbcs_parm01.addParm('relaxTFile','sponge_temp.bin',PARM_STR);  
 
   writeDataset(Smatfinal,fullfile(inputpath,'sponge_salt.bin'),ieee,prec); 
-  rbcs_parm01.addParm('relaxSFile','sponge_salt.bin',PARM_STR);  
+  rbcs_parm01.addParm('relaxSFile','sponge_salt.bin',PARM_STR); 
+
+  writeDataset(uvelfinal,fullfile(inputpath,'sponge_uvel.bin'),ieee,prec); 
+  rbcs_parm01.addParm('relaxUFile','sponge_uvel.bin',PARM_STR); 
+
+  writeDataset(vvelfinal,fullfile(inputpath,'sponge_vvel.bin'),ieee,prec); 
+  rbcs_parm01.addParm('relaxVFile','sponge_vvel.bin',PARM_STR); 
   
   %%%%%%%%%%%%%%%%%%%%%  
   %%%%% RBCS MASK %%%%%
@@ -799,6 +878,7 @@ Smatfinal=permute(Smatfull,[3,2,1]);
   msk=zeros(Nx,Ny,Nr);  
     
   %%% Mask only nonzero at surface in the polynya
+ %{
   for j=1:Ny      
     for i=1:Nx             
       if (yy(j)<-0.4*Ly) || (yy(j)>0.4*Ly) 
@@ -806,13 +886,25 @@ Smatfinal=permute(Smatfull,[3,2,1]);
       end
     end
   end         
-  
+ %}  
+
+      for i = 1:Nr
+          if zz(i)<-0.9*H
+              msk(:,:,i) = 1;
+          end
+      end
   %%% Save as an input parameter
   writeDataset(msk,fullfile(inputpath,'rbcs_temp_mask.bin'),ieee,prec); 
   rbcs_parm01.addParm('relaxMaskFile(1)','rbcs_temp_mask.bin',PARM_STR); 
 
   writeDataset(msk,fullfile(inputpath,'rbcs_salt_mask.bin'),ieee,prec); 
-  rbcs_parm01.addParm('relaxMaskFile(2)','rbcs_salt_mask.bin',PARM_STR);  
+  rbcs_parm01.addParm('relaxMaskFile(2)','rbcs_salt_mask.bin',PARM_STR); 
+
+  writeDataset(msk,fullfile(inputpath,'rbcs_uvel_mask.bin'),ieee,prec); 
+  rbcs_parm01.addParm('relaxMaskUFile','rbcs_uvel_mask.bin',PARM_STR); 
+
+  writeDataset(msk,fullfile(inputpath,'rbcs_vvel_mask.bin'),ieee,prec); 
+  rbcs_parm01.addParm('relaxMaskVFile','rbcs_vvel_mask.bin',PARM_STR); 
   
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1266,12 +1358,39 @@ phi0surf=zeros(Nx,Ny);
 fid=fopen(fullfile(inputpath,'SHELFICEloadAnomalyFile.bin'), 'w','b'); 
 fwrite(fid,phi0surf,prec);fclose(fid);
 
-shelfthickness=30;%5
+shelfthickness= 15.75; %15.75;
 
-depth=-shelfthickness; %default -15 deep channel
+depth=-15.75; %default -15 deep channel
 icetopo=depth*ones(Nx,Ny);
 halfwidth=150; %30 %10 for default half channel width
-icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )=0;
+
+%rounding bottom of channel
+icetopo(round(Nx/2)-round(halfwidth/dx(1)):round(Nx/2)+round(halfwidth/dx(1)),: )= - 0.9;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))-1,:) = depth+2*0.9; 
+icetopo(round(Nx/2)+round(halfwidth/dx(1))+1,:) = depth+2*0.9;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))-2,:) = depth+2*0.6;
+icetopo(round(Nx/2)+round(halfwidth/dx(1))+2,:) = depth+2*0.6;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))-3,:) = depth+2*0.3;
+icetopo(round(Nx/2)+round(halfwidth/dx(1))+3,:) = depth+2*0.3;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))-4,:) = depth+0.3;
+icetopo(round(Nx/2)+round(halfwidth/dx(1))+4,:) = depth+0.3;
+
+%{
+%rounding top of channel 
+icetopo(round(Nx/2)-round(halfwidth/dx(1)),:) = -0.9-2*0.9; 
+icetopo(round(Nx/2)+round(halfwidth/dx(1)),:) = -0.9-2*0.9;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))+1,:) = -0.9-2*0.6; 
+icetopo(round(Nx/2)+round(halfwidth/dx(1))-1,:) = -0.9-2*0.6;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))+2,:) = -0.9-2*0.3; 
+icetopo(round(Nx/2)+round(halfwidth/dx(1))-2,:) = -0.9-2*0.3;
+icetopo(round(Nx/2)-round(halfwidth/dx(1))+3,:) = -0.9-0.3; 
+icetopo(round(Nx/2)+round(halfwidth/dx(1))-3,:) = -0.9-0.3;
+%}
+
+
+
+
+
 
 
 fid=fopen(fullfile(inputpath,'SHELFICEtopoFile.bin'), 'w','b'); 
@@ -1290,7 +1409,9 @@ SHELFICEconserve = true;
 %   SHELFICEheatTransCoeff = .0001;
 SHELFICEheatTransCoeff = 0;
 SHELFICEwriteState = true;
-%SHELFICEselectDragQuadr = 1;
+
+SHELFICEDragQuadratic = 2e-3;
+SHELFICEselectDragQuadr = 0;
 
 
 shelfice_parm01.addParm('SHELFICEloadAnomalyFile',SHELFICEloadAnomalyFile,PARM_STR);
@@ -1300,7 +1421,9 @@ shelfice_parm01.addParm('SHELFICEboundaryLayer',SHELFICEboundaryLayer,PARM_BOOL)
 shelfice_parm01.addParm('SHELFICEconserve',SHELFICEconserve,PARM_BOOL);
 shelfice_parm01.addParm('SHELFICEheatTransCoeff',SHELFICEheatTransCoeff,PARM_REAL);
 shelfice_parm01.addParm('SHELFICEwritestate',SHELFICEwriteState,PARM_BOOL);
-%shelfice_parm01.addParm('SHELFICEselectDragQuadr',SHELFICEselectDragQuadr,PARM_REAL);
+
+shelfice_parm01.addParm('SHELFICEDragQuadratic',SHELFICEDragQuadratic,PARM_REAL);
+shelfice_parm01.addParm('SHELFICEselectDragQuadr',SHELFICEselectDragQuadr,PARM_INT);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% WRITE THE 'data.shelfice' FILE %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1317,7 +1440,7 @@ write_data_shelfice(inputpath,SHELFICE_PARM,listterm,realfmt);
 
 
 
-
+%{
   %%%%%%%%%%%%%%%%%%%%%%%
   %%%%% OBCS SET-UP %%%%%
   %%%%%%%%%%%%%%%%%%%%%%%
@@ -1591,7 +1714,7 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   %%% Creates the 'data.obcs' file
   write_data_obcs(inputpath,OBCS_PARM,listterm,realfmt);
 
-
+%}
 
 
 
@@ -1704,9 +1827,9 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   
   numdiags_inst = length(diag_fields_inst);  
   if (use_3D)
-    diag_freq_inst = 0.1*t1day;
+    diag_freq_inst = 0.05*t1day;
   else
-    diag_freq_inst = 0.1*t1day;
+    diag_freq_inst = 0.05*t1day;
   end
   diag_phase_inst = 0;
   
@@ -1758,8 +1881,8 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   packages.addParm('useDiagnostics',true,PARM_BOOL);
   packages.addParm('useSHELFICE',true,PARM_BOOL);
   %packages.addParm('useKPP',~nonHydrostatic,PARM_BOOL);
-  %packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
-  packages.addParm('useOBCS',true,PARM_BOOL);     
+  packages.addParm('useRBCS',~use_seaIce,PARM_BOOL);      
+  %packages.addParm('useOBCS',true,PARM_BOOL);     
   packages.addParm('useSEAICE',false,PARM_BOOL);  
   packages.addParm('useEXF',false,PARM_BOOL);  
   
@@ -1792,8 +1915,8 @@ fid=fopen(fullfile(inputpath,'SBCs.bin'), 'w','b');  fwrite(fid,SBCs,prec);fclos
   end
   if (use_seaIce)
     ALL_PARMS = [ALL_PARMS SEAICE_PARM EXF_PARM];
-  else
-    ALL_PARMS = [ALL_PARMS OBCS_PARM];
+  %else
+    %ALL_PARMS = [ALL_PARMS OBCS_PARM];
   end    
   write_matlab_params(inputpath,ALL_PARMS,realfmt);
   

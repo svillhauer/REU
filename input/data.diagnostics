@@ -171,7 +171,7 @@
  timePhase(41)=0.00000000e+00,
  fields(1,42)='VVEL',
  fileName(42)='VVEL_inst',
- frequency(42)=-4.32000000e+03,
+ frequency(42)=-4.32000000e+00,
  timePhase(42)=0.00000000e+00,
  fields(1,43)='WVEL',
  fileName(43)='WVEL_inst',

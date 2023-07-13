@@ -10,5 +10,7 @@
  SHELFICEconserve=.TRUE.,
  SHELFICEheatTransCoeff=0.00000000e+00,
  SHELFICEwritestate=.TRUE.,
+ SHELFICEDragQuadratic=2.00000000e-03,
+ SHELFICEselectDragQuadr=0,
  &
 

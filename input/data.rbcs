@@ -6,8 +6,8 @@
  &RBCS_PARM01
  useRBCtemp=.TRUE.,
  useRBCsalt=.TRUE.,
- useRBCuVel=.FALSE.,
- useRBCvVel=.FALSE.,
+ useRBCuVel=.TRUE.,
+ useRBCvVel=.TRUE.,
  tauRelaxT=8.64000000e+03,
  tauRelaxS=8.64000000e+03,
  tauRelaxU=4.32000000e+03,
