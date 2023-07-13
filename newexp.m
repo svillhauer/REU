@@ -67,7 +67,7 @@ function newexp (batch_name,exp_name)
   sNy = 100; %%% no. of y-gridpoints per tile 
   nPx = 1; %%% no. of processors in x-direction
   nPy = 1; %%% no. of processors in y-direction
-  Nr = 60; %%% no. of z-gridpoints  
+  Nr = 70; %%% no. of z-gridpoints  
  
   %%% Set-up for Ardbeg, 400 x 400 x 100
 %   opt_file = 'ardbeg_ucla'; %%% options file name
