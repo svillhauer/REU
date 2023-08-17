@@ -594,7 +594,7 @@ sRefout = Smin + (Smax-Smin)*0.5*(1+0.5*(sqrt((1-(zz-Zpyc)/Wpyc).^2 + 4*gam_h*((
     deltaT = min([deltaT deltaT_vadv]);
   end
   deltaT = round(deltaT);
-  deltaT=deltaT/14; %ad hoc: we found that the normal dT wasn't working (approx. dT=14s)
+  deltaT=deltaT/13; %ad hoc: we found that the normal dT wasn't working (approx. dT=14s)
 
   nTimeSteps = ceil(simTime/deltaT);
   simTimeAct = nTimeSteps*deltaT;
@@ -1428,6 +1428,8 @@ icetopo_stored = flip(icetopo_stored);
 for i = 0:round(halfwidth/dx(1)) 
     icetopo(round(Nx/2) + i,: ) = icetopo_stored(i+1); %depth - (shelfthickness/2)*tanh(0.02*dx(1)*i-2)+(shelfthickness/2); 
 end 
+
+icetopo(round(Nx/2),:) = -dz(1);
 
 
 %{
